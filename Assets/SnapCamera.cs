@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class SnapCamera : MonoBehaviour
 {
+    [SerializeField] GameObject Panel;
+    public GameObject blackout;
+
     [SerializeField] Vector3 lastMousePosition;
 
     [SerializeField] Transform CameraReticle;
@@ -12,8 +15,20 @@ public class SnapCamera : MonoBehaviour
     [SerializeField] GameObject[] taggedGameObject;
     [SerializeField] Transform closestGameObject;
 
+    //Bound for changes
+    [SerializeField] Transform CameraHolder;
+
+    //Camera origin
+    Vector3 cameraOrigin;
+    bool switchMode;
+
 
     public float LerpTime = 1f;
+
+    private void Start()
+    {
+        cameraOrigin = CameraHolder.position;
+    }
 
     private void Update()
     {
@@ -83,25 +98,35 @@ public class SnapCamera : MonoBehaviour
 
     void SnapSystem()
     {
-        if(Input.GetMouseButtonDown(0))
+        if(Input.GetMouseButtonDown(0) && taggedGameObject.Length >0 && switchMode == false)
         {
-            Debug.Log(GetClosestEnemy(taggedGameObject));
-            StartCoroutine(LerpFunction(1, LerpTime));
+            switchMode = true;
+            closestGameObject = GetClosestEnemy(taggedGameObject);
+            StartCoroutine(LerpFunction(2.5f, LerpTime, closestGameObject));
+            CameraReticle.gameObject.SetActive(false);
+            blackout.SetActive(true);
+            closestGameObject.GetComponent<SpriteRenderer>().sortingOrder = 1;
         }
     }
 
-    IEnumerator LerpFunction(float endValue, float duration)
+    IEnumerator LerpFunction(float endValue, float duration, Transform target)
     {
         float time = 0;
         float startValue = Camera.main.orthographicSize;
+        Vector2 cameraHold = CameraHolder.position;
+
 
         while (time < duration)
         {
             Camera.main.orthographicSize = Mathf.Lerp(startValue, endValue, time / duration);
+            CameraHolder.position = Vector2.Lerp(cameraHold, target.position, time / duration);
+
             time += Time.deltaTime;
             yield return null;
         }
         Camera.main.orthographicSize = endValue;
+        Panel.SetActive(true);
+
     }
     Transform GetClosestEnemy(GameObject[] enemies)
     {
@@ -117,7 +142,19 @@ public class SnapCamera : MonoBehaviour
                 bestTarget = col.transform;
             }
         }
+        Debug.Log(bestTarget);
         return bestTarget;
+    }
+
+    public void backButton()
+    {
+        Panel.SetActive(false);
+        Camera.main.orthographicSize = 5f;
+        switchMode = false;
+        CameraHolder.position = cameraOrigin;
+        closestGameObject.GetComponent<SpriteRenderer>().sortingOrder = 0;
+        blackout.SetActive(false);
+        CameraReticle.gameObject.SetActive(true);
     }
 
 }
