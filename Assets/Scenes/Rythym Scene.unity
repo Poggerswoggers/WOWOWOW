@@ -258,19 +258,20 @@ MonoBehaviour:
   musicSource: {fileID: 886693737}
   firstBeatOffset: 0
   track:
-  - 8
-  - 12
+  - 6
+  - 9
   - 14
   - 16
   - 18
   - 19
+  - 25
   beatsShownInAdvance: 3
   notePrefab: {fileID: 1021397276314201154, guid: 8d36d7173bac40f4ca5d88bddae480b8, type: 3}
   songStarted: 0
   scoreText: {fileID: 0}
   Target: {fileID: 943955533}
-  offsetToTarget: 1
-  beatOffset: 1
+  offsetToTarget: 0.5
+  beatOffset: 0.2
 --- !u!4 &886693739
 Transform:
   m_ObjectHideFlags: 0
