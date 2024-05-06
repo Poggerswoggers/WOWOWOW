@@ -58,6 +58,7 @@ public class MusicNote : MonoBehaviour
 
         if (transform.position.x < removeposition.x-3)
         {
+            cc.notesOnscreen.Dequeue();
             Destroy(gameObject);
         }
 

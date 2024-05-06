@@ -11,7 +11,6 @@ public class ConductorClass : MonoBehaviour
         To track the song, we'll need a few variables:*/
 
     // Used to display "HIT" or "MISS".
-    public TextMesh statusText;
 
 
     //Song beats per minute
@@ -57,13 +56,15 @@ public class ConductorClass : MonoBehaviour
     [SerializeField] private bool songStarted = false;
 
 
-    //Score
-    public TextMeshProUGUI scoreText;
+    // Used to display "HIT" or "MISS".
+    public GameObject scoreText;
+    Vector3 scoreStartPos;
 
-    private Queue<MusicNote> notesOnscreen;
+    public Queue<MusicNote> notesOnscreen;
 
     //EndPoint target
     [SerializeField] Transform Target;
+    TargetController tc;
 
 
     //DistanceAndBeatOffset
@@ -75,6 +76,10 @@ public class ConductorClass : MonoBehaviour
         if(!songStarted)
         {
             songStarted = true;
+
+            tc = Target.GetComponent<TargetController>();
+            scoreStartPos = scoreText.transform.position;
+
             StartSong();
         }
     }
@@ -133,6 +138,8 @@ public class ConductorClass : MonoBehaviour
 
     public void HitNote()
     {
+        tc.Pusle();
+
         if(notesOnscreen.Count>0)
         {
             MusicNote frontNote = notesOnscreen.Peek();
@@ -150,7 +157,7 @@ public class ConductorClass : MonoBehaviour
 
     void BeatMatch(MusicNote frontNote)
     {
-        if(Mathf.Abs(frontNote.noteBeat -songPositionInBeats) < beatOffset)
+        if (Mathf.Abs(frontNote.noteBeat - songPositionInBeats) < beatOffset)
         {
             Debug.Log("HitTarget");
             Debug.Log(frontNote.noteBeat + "Current Beat is " + songPositionInBeats);
@@ -159,7 +166,26 @@ public class ConductorClass : MonoBehaviour
             notesOnscreen.Dequeue();
 
             Destroy(frontNote.gameObject);
-
+            
+            //pass
+            StartCoroutine(scoreCo(true));
         }
+    }
+
+    IEnumerator scoreCo(bool hit)
+    {
+
+            scoreText.GetComponent<TextMeshProUGUI>().text = "HIT";
+
+        scoreText.transform.position = scoreStartPos;
+
+        scoreText.SetActive(true);
+        LeanTween.cancel(scoreText);
+
+        scoreText.LeanMoveY(scoreText.transform.position.y + 25, 0.5f).setEase(LeanTweenType.easeInQuad);
+        yield return new WaitForSeconds(0.6f);
+        scoreText.SetActive(false);
+
+        
     }
 }
